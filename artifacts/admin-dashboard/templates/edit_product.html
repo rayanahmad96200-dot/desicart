@@ -6,15 +6,12 @@
 <div class="row justify-content-center">
     <div class="col-lg-8 col-xl-7">
         <div class="d-flex align-items-center gap-2 mb-3">
-            <a href="/dashboard" class="btn btn-sm btn-light" style="border-radius:8px;">
-                <i class="bi bi-arrow-left"></i> Back
-            </a>
+            <a href="/admin-panel/dashboard" class="btn btn-sm btn-light" style="border-radius:8px;"><i class="bi bi-arrow-left"></i> Back</a>
             <h5 class="mb-0 fw-bold">Edit: {{ product['title'] }}</h5>
         </div>
-
         <div class="card">
             <div class="card-body p-4">
-                <form method="POST" action="/products/edit/{{ product['id'] }}" enctype="multipart/form-data">
+                <form method="POST" action="/admin-panel/products/edit/{{ product['id'] }}" enctype="multipart/form-data">
 
                     <div class="mb-4">
                         <label class="form-label">Product Image</label>
@@ -27,24 +24,21 @@
                             <div id="dropzoneContent" style="display:none;">
                                 <i class="bi bi-cloud-upload" style="font-size:2.5rem;color:#cbd5e1;"></i>
                                 <p class="mb-1 mt-2" style="color:#64748b;font-weight:500;">Click to upload or drag & drop</p>
-                                <p class="mb-0" style="font-size:0.8rem;color:#94a3b8;">PNG, JPG, JPEG, GIF, WEBP — max 16MB</p>
                             </div>
-                            <img id="previewImg" src="/admin/static/uploads/{{ product['image_path'] }}" alt="Current image" style="max-height:200px;border-radius:10px;object-fit:contain;">
+                            <img id="previewImg" src="/admin-panel/static/uploads/{{ product['image_path'] }}" style="max-height:200px;border-radius:10px;object-fit:contain;">
                             {% else %}
                             <div id="dropzoneContent">
                                 <i class="bi bi-cloud-upload" style="font-size:2.5rem;color:#cbd5e1;"></i>
                                 <p class="mb-1 mt-2" style="color:#64748b;font-weight:500;">Click to upload or drag & drop</p>
                                 <p class="mb-0" style="font-size:0.8rem;color:#94a3b8;">PNG, JPG, JPEG, GIF, WEBP — max 16MB</p>
                             </div>
-                            <img id="previewImg" src="" alt="Preview" style="display:none;max-height:200px;border-radius:10px;object-fit:contain;">
+                            <img id="previewImg" src="" style="display:none;max-height:200px;border-radius:10px;object-fit:contain;">
                             {% endif %}
                         </div>
                         <input type="file" name="image" id="imageInput" accept="image/*" style="display:none;" onchange="previewImage(this)">
-                        <div class="d-flex gap-2 mt-2">
-                            {% if product['image_path'] %}
-                            <span class="text-muted small align-self-center"><i class="bi bi-image me-1"></i>Current image — upload new to replace</span>
-                            {% endif %}
-                        </div>
+                        {% if product['image_path'] %}
+                        <div class="text-muted small mt-2"><i class="bi bi-image me-1"></i>Current image shown — upload new to replace</div>
+                        {% endif %}
                     </div>
 
                     <div class="mb-3">
@@ -53,8 +47,18 @@
                     </div>
 
                     <div class="mb-3">
+                        <label class="form-label">Tagline <span class="text-muted">(short subtitle)</span></label>
+                        <input type="text" name="tagline" class="form-control" value="{{ product['tagline'] or '' }}">
+                    </div>
+
+                    <div class="mb-3">
                         <label class="form-label">Description</label>
                         <textarea name="description" class="form-control" rows="3">{{ product['description'] or '' }}</textarea>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Features <span class="text-muted">(one per line)</span></label>
+                        <textarea name="features" class="form-control" rows="5">{{ features_text }}</textarea>
                     </div>
 
                     <div class="row g-3 mb-3">
@@ -88,7 +92,7 @@
                             <label class="form-label">Badge <span class="text-muted">(optional)</span></label>
                             <select name="badge" class="form-select">
                                 <option value="">No badge</option>
-                                {% for badge in ['Best Seller', 'New', 'Trending', 'Hot Pick', 'Summer Deal', 'Eco Pick', 'Limited'] %}
+                                {% for badge in ['Best Seller', 'New', 'Trending', 'Hot Pick', 'Summer Deal', 'Eco Pick', 'Limited', 'Outdoor'] %}
                                 <option value="{{ badge }}" {% if product['badge'] == badge %}selected{% endif %}>{{ badge }}</option>
                                 {% endfor %}
                             </select>
@@ -96,10 +100,8 @@
                     </div>
 
                     <div class="d-flex gap-2">
-                        <button type="submit" class="btn btn-primary px-4" style="border-radius:10px;">
-                            <i class="bi bi-check-circle me-2"></i>Save Changes
-                        </button>
-                        <a href="/dashboard" class="btn btn-light px-4" style="border-radius:10px;">Cancel</a>
+                        <button type="submit" class="btn btn-primary px-4" style="border-radius:10px;"><i class="bi bi-check-circle me-2"></i>Save Changes</button>
+                        <a href="/admin-panel/dashboard" class="btn btn-light px-4" style="border-radius:10px;">Cancel</a>
                     </div>
                 </form>
             </div>
@@ -116,8 +118,7 @@ function previewImage(input) {
         reader.onload = function(e) {
             document.getElementById('dropzoneContent').style.display = 'none';
             const img = document.getElementById('previewImg');
-            img.src = e.target.result;
-            img.style.display = 'block';
+            img.src = e.target.result; img.style.display = 'block';
         };
         reader.readAsDataURL(input.files[0]);
     }
@@ -128,9 +129,7 @@ function handleDrop(e) {
     const file = e.dataTransfer.files[0];
     if (file && file.type.startsWith('image/')) {
         const input = document.getElementById('imageInput');
-        const dt = new DataTransfer();
-        dt.items.add(file);
-        input.files = dt.files;
+        const dt = new DataTransfer(); dt.items.add(file); input.files = dt.files;
         previewImage(input);
     }
 }

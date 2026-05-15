@@ -1,0 +1,13 @@
+id = "admin-dashboard"
+kind = "web"
+title = "Admin Dashboard"
+previewPath = "/admin-panel/"
+
+[[services]]
+name = "Admin Dashboard"
+paths = ["/admin-panel/"]
+localPort = 8000
+waitForPort = 8000
+
+[services.development]
+run = "cd /home/runner/workspace/artifacts/admin-dashboard && python app.py"

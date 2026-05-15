@@ -5,7 +5,7 @@ import {
   Truck, ShieldCheck, Zap, Search, Menu, User
 } from "lucide-react";
 import logoImg from "@/assets/desicart-logo.png";
-import { getProduct, products, waLinkFor } from "@/lib/products";
+import { useProduct, useProducts, waLinkFor } from "@/lib/products";
 import { CustomerOrderForm } from "@/components/CustomerOrderForm";
 
 function MiniNav() {
@@ -76,22 +76,45 @@ function MiniNav() {
   );
 }
 
-function NotFoundProduct() {
-  return (
-    <div className="min-h-screen flex flex-col items-center justify-center gap-4 bg-background text-foreground p-6 text-center">
-      <h1 className="font-display text-4xl font-black">Product not found</h1>
-      <Link to="/" className="bg-foreground text-background px-6 py-3 rounded-full font-bold">
-        Back to Home
-      </Link>
-    </div>
-  );
-}
-
 export default function ProductPage() {
   const params = useParams<{ slug: string }>();
-  const product = getProduct(params.slug);
+  const { product, loading } = useProduct(params.slug);
+  const { products } = useProducts();
 
-  if (!product) return <NotFoundProduct />;
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background text-foreground">
+        <MiniNav />
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 pt-6">
+          <Link to="/" className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-accent transition-colors">
+            <ChevronLeft className="h-4 w-4" /> Back to shop
+          </Link>
+        </div>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-10">
+          <div className="grid md:grid-cols-2 gap-8 md:gap-12 animate-pulse">
+            <div className="aspect-square rounded-3xl bg-secondary" />
+            <div className="space-y-4">
+              <div className="h-6 bg-secondary rounded w-1/3" />
+              <div className="h-12 bg-secondary rounded w-3/4" />
+              <div className="h-4 bg-secondary rounded w-1/2" />
+              <div className="h-8 bg-secondary rounded w-1/4" />
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (!product) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center gap-4 bg-background text-foreground p-6 text-center">
+        <h1 className="font-display text-4xl font-black">Product not found</h1>
+        <Link to="/" className="bg-foreground text-background px-6 py-3 rounded-full font-bold">
+          Back to Home
+        </Link>
+      </div>
+    );
+  }
 
   const wa = waLinkFor(product.name);
   const related = products.filter((p) => p.slug !== product.slug).slice(0, 4);
@@ -115,13 +138,15 @@ export default function ProductPage() {
               </span>
             )}
             <div className="absolute h-2/3 w-2/3 rounded-full bg-white/20 blur-3xl" />
-            <img
-              src={product.img}
-              alt={product.name}
-              width={1024}
-              height={1024}
-              className="relative z-10 w-3/4 h-3/4 object-contain animate-float drop-shadow-2xl"
-            />
+            {product.img && (
+              <img
+                src={product.img}
+                alt={product.name}
+                width={1024}
+                height={1024}
+                className="relative z-10 w-3/4 h-3/4 object-contain animate-float drop-shadow-2xl"
+              />
+            )}
           </div>
 
           <div className="space-y-5 sm:space-y-6">
@@ -151,14 +176,16 @@ export default function ProductPage() {
 
             <p className="text-foreground/80 text-sm sm:text-base leading-relaxed">{product.description}</p>
 
-            <ul className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-              {product.features.map((f) => (
-                <li key={f} className="flex items-start gap-2 text-sm text-foreground/90">
-                  <span className="mt-1 h-1.5 w-1.5 rounded-full bg-accent shrink-0" />
-                  {f}
-                </li>
-              ))}
-            </ul>
+            {product.features.length > 0 && (
+              <ul className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                {product.features.map((f) => (
+                  <li key={f} className="flex items-start gap-2 text-sm text-foreground/90">
+                    <span className="mt-1 h-1.5 w-1.5 rounded-full bg-accent shrink-0" />
+                    {f}
+                  </li>
+                ))}
+              </ul>
+            )}
 
             <CustomerOrderForm product={product} />
 
@@ -177,27 +204,31 @@ export default function ProductPage() {
           </div>
         </div>
 
-        <section className="mt-16 sm:mt-24">
-          <h2 className="font-display text-2xl sm:text-3xl font-black text-foreground mb-6">You may also like</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
-            {related.map((p) => (
-              <Link
-                key={p.slug}
-                to={`/product/${p.slug}`}
-                className="group bg-card border border-border rounded-2xl p-4 sm:p-6 hover:border-accent/50 transition-all hover:-translate-y-1 flex items-center gap-4"
-              >
-                <div className="h-24 w-24 sm:h-32 sm:w-32 rounded-xl bg-secondary flex items-center justify-center shrink-0 overflow-hidden">
-                  <img src={p.img} alt={p.name} className="w-3/4 h-3/4 object-contain group-hover:scale-110 transition-transform" />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <h3 className="font-display text-base sm:text-lg font-bold text-foreground truncate">{p.name}</h3>
-                  <p className="text-xs sm:text-sm text-muted-foreground truncate">{p.tagline}</p>
-                  <span className="font-display text-base sm:text-lg font-black text-foreground mt-1 inline-block">{p.price}</span>
-                </div>
-              </Link>
-            ))}
-          </div>
-        </section>
+        {related.length > 0 && (
+          <section className="mt-16 sm:mt-24">
+            <h2 className="font-display text-2xl sm:text-3xl font-black text-foreground mb-6">You may also like</h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
+              {related.map((p) => (
+                <Link
+                  key={p.slug}
+                  to={`/product/${p.slug}`}
+                  className="group bg-card border border-border rounded-2xl p-4 sm:p-6 hover:border-accent/50 transition-all hover:-translate-y-1 flex items-center gap-4"
+                >
+                  <div className="h-24 w-24 sm:h-32 sm:w-32 rounded-xl bg-secondary flex items-center justify-center shrink-0 overflow-hidden">
+                    {p.img && (
+                      <img src={p.img} alt={p.name} className="w-3/4 h-3/4 object-contain group-hover:scale-110 transition-transform" />
+                    )}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <h3 className="font-display text-base sm:text-lg font-bold text-foreground truncate">{p.name}</h3>
+                    <p className="text-xs sm:text-sm text-muted-foreground truncate">{p.tagline}</p>
+                    <span className="font-display text-base sm:text-lg font-black text-foreground mt-1 inline-block">{p.price}</span>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          </section>
+        )}
       </main>
 
       <a

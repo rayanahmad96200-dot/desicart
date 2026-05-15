@@ -5,7 +5,7 @@ import {
   ShieldCheck, Headphones as HeadphonesIcon, Zap, Star,
   ChevronRight, ChevronLeft, User
 } from "lucide-react";
-import { products, waLinkFor } from "@/lib/products";
+import { useProducts, waLinkFor, type Product } from "@/lib/products";
 import logoImg from "@/assets/desicart-logo.png";
 import watchImg from "@/assets/ultra3-watch.png";
 import earbudsImg from "@/assets/airpods-pro-2.png";
@@ -76,16 +76,25 @@ function Navbar() {
   );
 }
 
-function HeroSlider() {
+function HeroSlider({ products }: { products: Product[] }) {
   const [i, setI] = useState(0);
   const total = products.length;
 
   useEffect(() => {
+    if (total === 0) return;
     const t = setInterval(() => setI((p) => (p + 1) % total), 5000);
     return () => clearInterval(t);
   }, [total]);
 
   const go = (n: number) => setI((n + total) % total);
+
+  if (total === 0) {
+    return (
+      <section className="relative bg-hero-gradient overflow-hidden min-h-[480px] md:min-h-[600px] flex items-center justify-center">
+        <div className="text-white/60 text-lg font-semibold">Loading products...</div>
+      </section>
+    );
+  }
 
   return (
     <section className="relative bg-hero-gradient overflow-hidden">
@@ -127,13 +136,15 @@ function HeroSlider() {
             </div>
             <div className="relative flex items-center justify-center order-1 md:order-2">
               <div className="absolute h-56 w-56 sm:h-72 sm:w-72 md:h-[28rem] md:w-[28rem] rounded-full bg-white/20 blur-3xl" />
-              <img
-                src={p.img}
-                alt={p.name}
-                width={1024}
-                height={1024}
-                className="relative z-10 w-56 sm:w-72 md:w-full md:max-w-lg animate-float drop-shadow-2xl"
-              />
+              {p.img && (
+                <img
+                  src={p.img}
+                  alt={p.name}
+                  width={1024}
+                  height={1024}
+                  className="relative z-10 w-56 sm:w-72 md:w-full md:max-w-lg animate-float drop-shadow-2xl"
+                />
+              )}
             </div>
           </div>
         ))}
@@ -168,7 +179,7 @@ function HeroSlider() {
   );
 }
 
-const categories = [
+const categoryLinks = [
   { label: "Smart Watches", img: watchImg, slug: "ultra-3-smartwatch" },
   { label: "Earbuds", img: earbudsImg, slug: "airpods-pro-2-black" },
   { label: "Speakers", img: speakerImg, slug: "kts-1185-speaker" },
@@ -180,7 +191,7 @@ function Categories() {
   return (
     <section className="max-w-7xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-6">
-        {categories.map((c) => (
+        {categoryLinks.map((c) => (
           <Link key={c.label} to={`/product/${c.slug}`} className="flex flex-col items-center gap-2 group">
             <div className="h-16 w-16 sm:h-24 sm:w-24 rounded-full bg-secondary border border-border flex items-center justify-center overflow-hidden group-hover:border-accent transition-colors">
               <img src={c.img} alt={c.label} loading="lazy" className="h-3/4 w-3/4 object-contain" />
@@ -216,7 +227,7 @@ function FeatureStrip() {
   );
 }
 
-function Products() {
+function Products({ products }: { products: Product[] }) {
   return (
     <section id="products" className="max-w-7xl mx-auto px-4 sm:px-6 py-12 sm:py-20">
       <div className="flex items-end justify-between mb-8 sm:mb-12">
@@ -228,46 +239,60 @@ function Products() {
           View All <ChevronRight className="h-4 w-4" />
         </a>
       </div>
-      <div className="grid grid-cols-2 md:grid-cols-3 gap-3 sm:gap-6">
-        {products.map((p) => (
-          <Link
-            key={p.slug}
-            to={`/product/${p.slug}`}
-            className="group bg-card border border-border rounded-2xl sm:rounded-3xl p-3 sm:p-6 hover:border-accent/50 transition-all hover:-translate-y-1 hover:shadow-product duration-300 block"
-          >
-            <div className="relative aspect-square rounded-xl sm:rounded-2xl bg-secondary overflow-hidden mb-3 sm:mb-6 flex items-center justify-center">
-              {p.tag && (
-                <span className="absolute top-3 left-3 z-10 text-[10px] uppercase tracking-widest font-bold bg-accent text-accent-foreground px-2.5 py-1 rounded-full">
-                  {p.tag}
-                </span>
-              )}
-              <img
-                src={p.img}
-                alt={p.name}
-                loading="lazy"
-                width={1024}
-                height={1024}
-                className="w-3/4 h-3/4 object-contain group-hover:scale-110 transition-transform duration-500"
-              />
+      {products.length === 0 ? (
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-3 sm:gap-6">
+          {[...Array(6)].map((_, i) => (
+            <div key={i} className="bg-card border border-border rounded-2xl sm:rounded-3xl p-3 sm:p-6 animate-pulse">
+              <div className="aspect-square rounded-xl sm:rounded-2xl bg-secondary mb-3 sm:mb-6" />
+              <div className="h-4 bg-secondary rounded mb-2" />
+              <div className="h-3 bg-secondary rounded w-2/3" />
             </div>
-            <div className="flex items-start justify-between gap-2 mb-2">
-              <h3 className="font-display text-sm sm:text-xl font-bold text-foreground leading-tight">{p.name}</h3>
-              <div className="flex shrink-0 pt-1">
-                {[...Array(5)].map((_, i) => (
-                  <Star key={i} className="h-3 w-3 fill-current" style={{ color: "var(--neon-green)" }} />
-                ))}
+          ))}
+        </div>
+      ) : (
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-3 sm:gap-6">
+          {products.map((p) => (
+            <Link
+              key={p.slug}
+              to={`/product/${p.slug}`}
+              className="group bg-card border border-border rounded-2xl sm:rounded-3xl p-3 sm:p-6 hover:border-accent/50 transition-all hover:-translate-y-1 hover:shadow-product duration-300 block"
+            >
+              <div className="relative aspect-square rounded-xl sm:rounded-2xl bg-secondary overflow-hidden mb-3 sm:mb-6 flex items-center justify-center">
+                {p.tag && (
+                  <span className="absolute top-3 left-3 z-10 text-[10px] uppercase tracking-widest font-bold bg-accent text-accent-foreground px-2.5 py-1 rounded-full">
+                    {p.tag}
+                  </span>
+                )}
+                {p.img && (
+                  <img
+                    src={p.img}
+                    alt={p.name}
+                    loading="lazy"
+                    width={1024}
+                    height={1024}
+                    className="w-3/4 h-3/4 object-contain group-hover:scale-110 transition-transform duration-500"
+                  />
+                )}
               </div>
-            </div>
-            <p className="text-muted-foreground text-[11px] sm:text-sm mb-3 sm:mb-4">{p.tagline}</p>
-            <div className="flex items-center justify-between gap-2">
-              <span className="font-display text-base sm:text-2xl font-black text-foreground">{p.price}</span>
-              <span className="bg-foreground text-background px-4 sm:px-5 py-2 sm:py-2.5 rounded-full text-xs sm:text-sm font-bold group-hover:bg-accent transition-colors">
-                Shop Now
-              </span>
-            </div>
-          </Link>
-        ))}
-      </div>
+              <div className="flex items-start justify-between gap-2 mb-2">
+                <h3 className="font-display text-sm sm:text-xl font-bold text-foreground leading-tight">{p.name}</h3>
+                <div className="flex shrink-0 pt-1">
+                  {[...Array(5)].map((_, i) => (
+                    <Star key={i} className="h-3 w-3 fill-current" style={{ color: "var(--neon-green)" }} />
+                  ))}
+                </div>
+              </div>
+              <p className="text-muted-foreground text-[11px] sm:text-sm mb-3 sm:mb-4">{p.tagline}</p>
+              <div className="flex items-center justify-between gap-2">
+                <span className="font-display text-base sm:text-2xl font-black text-foreground">{p.price}</span>
+                <span className="bg-foreground text-background px-4 sm:px-5 py-2 sm:py-2.5 rounded-full text-xs sm:text-sm font-bold group-hover:bg-accent transition-colors">
+                  Shop Now
+                </span>
+              </div>
+            </Link>
+          ))}
+        </div>
+      )}
     </section>
   );
 }
@@ -344,13 +369,15 @@ function Footer() {
 }
 
 export default function HomePage() {
+  const { products } = useProducts();
+
   return (
     <div className="min-h-screen bg-background text-foreground">
       <Navbar />
-      <HeroSlider />
+      <HeroSlider products={products} />
       <Categories />
       <FeatureStrip />
-      <Products />
+      <Products products={products} />
       <Footer />
       <a
         href={waLinkFor("DesiCart products")}
