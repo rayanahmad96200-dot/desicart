@@ -46,8 +46,12 @@ function Navbar() {
           <a href="#products" aria-label="Search products" className="hover:text-accent transition-colors">
             <Search className="h-5 w-5" />
           </a>
-          <a href="#support" aria-label="Account support" className="hidden sm:inline hover:text-accent transition-colors">
-            <User className="h-5 w-5" />
+          <a
+            href="/admin-panel/"
+            aria-label="Admin Panel"
+            className="hidden sm:inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider border border-border px-3 py-1.5 rounded-full hover:border-accent hover:text-accent transition-colors"
+          >
+            <User className="h-3.5 w-3.5" /> Admin
           </a>
           <a
             href={waLinkFor("customer cart order")}
@@ -69,6 +73,9 @@ function Navbar() {
                 {link.label}
               </a>
             ))}
+            <a href="/admin-panel/" className="py-1 hover:text-accent transition-colors flex items-center gap-2">
+              <User className="h-4 w-4" /> Admin Panel
+            </a>
           </div>
         </div>
       )}
