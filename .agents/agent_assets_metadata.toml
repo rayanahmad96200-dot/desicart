@@ -1,0 +1,26 @@
+uploads = []
+outputs = []
+
+[[generated]]
+id = "Ipgt6vutn8HiTWEq1Vy8J"
+uri = "file://artifacts/desicart/src/assets/portable-ac-fan.png"
+type = "image"
+title = "generated_image"
+
+[[generated]]
+id = "nK5p-ohmQ6Jm55YQkZKCR"
+uri = "file://artifacts/desicart/src/assets/powerbank-10k-slim.png"
+type = "image"
+title = "generated_image"
+
+[[generated]]
+id = "0QoIYAXGLcexs-dbjhB9E"
+uri = "file://artifacts/desicart/src/assets/powerbank-20k-transparent.png"
+type = "image"
+title = "generated_image"
+
+[[generated]]
+id = "6qk-daB0Td6LA-JFtx-J5"
+uri = "file://artifacts/desicart/src/assets/p9-headphones.png"
+type = "image"
+title = "generated_image"
