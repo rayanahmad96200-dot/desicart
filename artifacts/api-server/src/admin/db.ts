@@ -1,0 +1,319 @@
+import fs from "fs";
+import path from "path";
+import { randomUUID } from "crypto";
+
+function resolveFromRoot(...segments: string[]): string {
+  const cwd = process.cwd();
+  const inApiServer = /[/\\]api-server$/.test(cwd);
+  return inApiServer
+    ? path.resolve(cwd, ...segments)
+    : path.resolve(cwd, "artifacts/api-server", ...segments);
+}
+
+const DATA_PATH =
+  process.env.PRODUCTS_DATA_PATH || resolveFromRoot("data/products.json");
+
+export type Product = {
+  id: number;
+  slug: string;
+  title: string;
+  tagline: string;
+  description: string;
+  features: string;
+  price: number;
+  original_price: number | null;
+  category: string | null;
+  badge: string | null;
+  image_path: string | null;
+  created_at: string;
+};
+
+const SEED: Omit<Product, "id" | "created_at">[] = [
+  {
+    slug: "ultra-3-smartwatch",
+    title: "Ultra 3 Smartwatch",
+    tagline: "Pakistan's Most Versatile 7-Strap Luxury Watch",
+    description:
+      "The ultimate smartwatch package. Featuring a stunning Super AMOLED display and 7 different interchangeable straps to match every outfit.",
+    features: JSON.stringify([
+      "Big Full HD Infinite Display",
+      "7 Premium Straps Included in Box",
+      "Wireless Fast Charging",
+      "Bluetooth Calling & Heart Rate Monitoring",
+      "Sports Mode & Calculator Built-in",
+    ]),
+    price: 4500,
+    original_price: 12000,
+    category: "Smart Watches",
+    badge: "Best Seller",
+    image_path: null,
+  },
+  {
+    slug: "airpods-pro-2-black",
+    title: "Airpods Pro 2 Black",
+    tagline: "Master Copy | ANC & Deep Bass",
+    description:
+      "Experience premium sound with the sleek Airpods Pro 2 in a stunning matte black finish.",
+    features: JSON.stringify([
+      "Active Noise Cancellation (ANC) support",
+      "Superior Bass & Crisp Treble",
+      "3-4 Hours Playback Time",
+      "Touch Controls for Music & Calls",
+      "Wireless Charging Case",
+    ]),
+    price: 1500,
+    original_price: 3500,
+    category: "Earbuds",
+    badge: "Best Seller",
+    image_path: null,
+  },
+  {
+    slug: "portable-ac-cooling-fan",
+    title: "Portable AC Cooling Fan",
+    tagline: "3-in-1 Cooler, Humidifier & Air Purifier",
+    description:
+      "Beat the heat with this ultra-portable personal air cooler. Features whisper-quiet operation and built-in water tank.",
+    features: JSON.stringify([
+      "3-in-1: Cooling Fan + Humidifier + Air Purifier",
+      "Built-in Water Tank (up to 8 hours cooling)",
+      "3 Fan Speed Settings",
+      "Ultra-Quiet Night Mode",
+      "USB Powered — No Electricity Required",
+    ]),
+    price: 1999,
+    original_price: 4500,
+    category: "Accessories",
+    badge: "Summer Deal",
+    image_path: null,
+  },
+  {
+    slug: "powerbank-10000mah-slim",
+    title: "10000mAh Slim Power Bank",
+    tagline: "PD 22.5W Fast Charging | Ultra Slim Design",
+    description:
+      "Never run out of battery with this sleek, pocket-sized 10000mAh power bank.",
+    features: JSON.stringify([
+      "22.5W PD Fast Charging",
+      "LED Digital Battery Percentage Display",
+      "Ultra-Slim Pocket-Friendly Design",
+      "Charges 2 Devices Simultaneously",
+      "Aviation-Grade Battery Cell Protection",
+    ]),
+    price: 1999,
+    original_price: 4000,
+    category: "Power Banks",
+    badge: "New",
+    image_path: null,
+  },
+  {
+    slug: "powerbank-20000mah-transparent",
+    title: "20000mAh Transparent Power Bank",
+    tagline: "66W Super Fast Charging | See-Through Tech",
+    description:
+      "The most powerful power bank with a stunning transparent body that shows off the internal circuit board.",
+    features: JSON.stringify([
+      "66W Blazing Fast PD Charging",
+      "Transparent Body — Show Off Your Tech",
+      "Digital Display: Battery % + Output Current/Voltage",
+      "20000mAh Capacity — Charges Phone 5-6 Times",
+      "Multi-device Support: Type-C + USB-A Ports",
+    ]),
+    price: 3499,
+    original_price: 7000,
+    category: "Power Banks",
+    badge: "Trending",
+    image_path: null,
+  },
+  {
+    slug: "kts-1185-speaker",
+    title: "KTS-1185 Wireless Speaker",
+    tagline: "3-Inch Drive | Built-in Emergency Torch",
+    description:
+      "A portable powerhouse for music lovers with a 3-inch high-bass driver and built-in emergency light.",
+    features: JSON.stringify([
+      '3" Powerful Audio Drive',
+      "Built-in High-Power Emergency Light",
+      "FM Radio & USB/TF Card Support",
+      "Wireless Bluetooth Connectivity",
+      "Rugged, Portable Design with Handle",
+    ]),
+    price: 1800,
+    original_price: 3500,
+    category: "Speakers",
+    badge: "New",
+    image_path: null,
+  },
+  {
+    slug: "p9-wireless-headphones",
+    title: "P9 Wireless Headphones",
+    tagline: "Deep Bass | 20H Playtime | Foldable Design",
+    description:
+      "The P9 over-ear wireless headphones deliver studio-quality sound in a sleek, foldable design.",
+    features: JSON.stringify([
+      "Powerful Deep Bass Sound",
+      "20-Hour Battery Life",
+      "Foldable & Lightweight — Travel-Ready",
+      "Built-in Mic for Hands-Free Calls",
+      "Bluetooth 5.0 + 3.5mm Wired Mode",
+    ]),
+    price: 1499,
+    original_price: 3500,
+    category: "Headphones",
+    badge: "Hot Pick",
+    image_path: null,
+  },
+  {
+    slug: "super-charger-powerbank",
+    title: "Super Charger Power Bank",
+    tagline: "LED Digital Display | PD Fast Charging",
+    description:
+      "Never run out of juice again with this intelligent super-fast charging power bank.",
+    features: JSON.stringify([
+      "Intelligent Super Fast Charging",
+      "LED Digital Battery Percentage Display",
+      "Type-C PD 20W Output",
+      "Travel-Friendly Design (Check-in OK)",
+      "Multiple Device Protection Circuit",
+    ]),
+    price: 2999,
+    original_price: 6000,
+    category: "Power Banks",
+    badge: "Limited",
+    image_path: null,
+  },
+  {
+    slug: "akg-handsfree",
+    title: "AKG Type-C Handsfree",
+    tagline: "Best Sound and Bass | Samsung Optimized",
+    description:
+      "Original-quality AKG tuned earphones featuring deep bass and crystal clear audio.",
+    features: JSON.stringify([
+      "Tuned by AKG for Studio Quality Sound",
+      "Tangle-free Fabric Cable",
+      "In-line Mic with Volume Control",
+      "Extra Bass Boost Technology",
+      "Ergonomic In-ear Design",
+    ]),
+    price: 600,
+    original_price: 1200,
+    category: "Headphones",
+    badge: null,
+    image_path: null,
+  },
+  {
+    slug: "kts-1706-solar-speaker",
+    title: "KTS-1706 Solar Speaker",
+    tagline: "4-Inch Drive | Solar Powered Music",
+    description:
+      "A rugged outdoor speaker with a built-in solar panel and massive 4-inch driver.",
+    features: JSON.stringify([
+      "Built-in Solar Charging Panel",
+      '4" High-Output Driver',
+      "High-Power LED Flashlight",
+      "Bluetooth, USB, and SD Card Support",
+      "Long-lasting Rechargeable Battery",
+    ]),
+    price: 2500,
+    original_price: 4500,
+    category: "Speakers",
+    badge: "Outdoor",
+    image_path: null,
+  },
+];
+
+function readData(): { products: Product[]; nextId: number } {
+  if (!fs.existsSync(DATA_PATH)) {
+    const dir = path.dirname(DATA_PATH);
+    fs.mkdirSync(dir, { recursive: true });
+    const now = new Date().toISOString();
+    const products: Product[] = SEED.map((s, i) => ({
+      ...s,
+      id: i + 1,
+      created_at: now,
+    }));
+    const data = { products, nextId: products.length + 1 };
+    fs.writeFileSync(DATA_PATH, JSON.stringify(data, null, 2));
+    return data;
+  }
+  return JSON.parse(fs.readFileSync(DATA_PATH, "utf8"));
+}
+
+function writeData(data: { products: Product[]; nextId: number }): void {
+  fs.writeFileSync(DATA_PATH, JSON.stringify(data, null, 2));
+}
+
+export function makeSlug(title: string): string {
+  return title
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-|-$/g, "");
+}
+
+export function getUniqueSlug(slug: string): string {
+  const { products } = readData();
+  const exists = products.some((p) => p.slug === slug);
+  if (!exists) return slug;
+  return `${slug}-${randomUUID().replace(/-/g, "").slice(0, 4)}`;
+}
+
+export const productDb = {
+  getAll(search?: string, category?: string): Product[] {
+    const { products } = readData();
+    return products
+      .filter((p) => {
+        if (
+          search &&
+          !p.title.toLowerCase().includes(search.toLowerCase()) &&
+          !(p.description || "").toLowerCase().includes(search.toLowerCase())
+        )
+          return false;
+        if (category && p.category !== category) return false;
+        return true;
+      })
+      .sort(
+        (a, b) =>
+          new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+      );
+  },
+
+  getById(id: number): Product | undefined {
+    const { products } = readData();
+    return products.find((p) => p.id === id);
+  },
+
+  count(): number {
+    return readData().products.length;
+  },
+
+  categories(): string[] {
+    const { products } = readData();
+    const cats = new Set(products.map((p) => p.category).filter(Boolean) as string[]);
+    return Array.from(cats).sort();
+  },
+
+  insert(data: Omit<Product, "id" | "created_at">): void {
+    const store = readData();
+    store.products.unshift({
+      ...data,
+      id: store.nextId,
+      created_at: new Date().toISOString(),
+    });
+    store.nextId++;
+    writeData(store);
+  },
+
+  update(id: number, data: Omit<Product, "id" | "slug" | "created_at">): void {
+    const store = readData();
+    const idx = store.products.findIndex((p) => p.id === id);
+    if (idx !== -1) {
+      store.products[idx] = { ...store.products[idx]!, ...data };
+      writeData(store);
+    }
+  },
+
+  delete(id: number): void {
+    const store = readData();
+    store.products = store.products.filter((p) => p.id !== id);
+    writeData(store);
+  },
+};

@@ -18,27 +18,11 @@ author = "agent"
 
 [[workflows.workflow.tasks]]
 task = "workflow.run"
-args = "Admin Dashboard"
-
-[[workflows.workflow.tasks]]
-task = "workflow.run"
 args = "DesiCart Frontend"
 
 [[workflows.workflow.tasks]]
 task = "workflow.run"
 args = "API Server"
-
-[[workflows.workflow]]
-name = "Admin Dashboard"
-author = "agent"
-
-[workflows.workflow.metadata]
-outputType = "console"
-
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "cd /home/runner/workspace/artifacts/admin-dashboard && python app.py"
-waitForPort = 8000
 
 [[workflows.workflow]]
 name = "DesiCart Frontend"

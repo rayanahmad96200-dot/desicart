@@ -30,7 +30,9 @@ async function buildAll() {
     external: [
       "*.node",
       "sharp",
-      "better-sqlite3",
+      "ejs",
+      "express-session",
+      "multer",
       "sqlite3",
       "canvas",
       "bcrypt",
