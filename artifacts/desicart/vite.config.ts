@@ -66,6 +66,12 @@ export default defineConfig({
     fs: {
       strict: true,
     },
+    proxy: {
+      "/admin-panel": {
+        target: "http://localhost:8000",
+        changeOrigin: true,
+      },
+    },
   },
   preview: {
     port,
